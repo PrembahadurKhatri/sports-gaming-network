@@ -1,42 +1,52 @@
 import { Search, Calendar, User, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import api from "../api/axios";
+import { useState, useEffect } from "react";
 
-const blogs = [
-  {
-    id: 1,
-    title: "10 Football Tips to Improve Your Game",
-    category: "Football",
-    image:
-      "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=900&q=80",
-    author: "Admin",
-    date: "July 2026",
-    description:
-      "Learn essential football techniques to improve your passing, shooting, and teamwork.",
-  },
-  {
-    id: 2,
-    title: "How to Build a Winning Cricket Team",
-    category: "Cricket",
-    image:
-      "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=900&q=80",
-    author: "Admin",
-    date: "July 2026",
-    description:
-      "Discover strategies for selecting players and creating a balanced cricket squad.",
-  },
-  {
-    id: 3,
-    title: "Preparing for Your First Tournament",
-    category: "Tournament",
-    image:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",
-    author: "Admin",
-    date: "July 2026",
-    description:
-      "Everything you need to know before participating in your first sports tournament.",
-  },
-];
+interface Blog {
+  id: number;
+  title: string;
+  category: string;
+  image: string;
+  author: string;
+  date: string;
+  description: string;
+}
 
 export default function Blog() {
+  const [search, setSearch] = useState("");
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [email, setEmail] = useState("");
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await api.get('/blogs');
+        setBlogs(response.data.blogs);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchBlogs();
+  }, [])
+
+
+  const featuredBlog = blogs[0];
+  // yesle featured blog lai represent garxa nlogs[0] le first blog lai featuredBlog ma rakxa
+  const latestBlogs = blogs.slice(1);
+  //yesle latest blogs lai represent garxa .slice(1) le 1 index bata suru garera sabai blogs lai latestBlogs ma rakxa  
+
+  const filteredBlogs = latestBlogs.filter((blog) =>
+    blog.title.toLowerCase().includes(search.toLowerCase()) ||
+    blog.category.toLowerCase().includes(search.toLowerCase())
+  );
+            if (blogs.length === 0) {
+  return (
+          <div className="flex min-h-screen items-center justify-center">
+            Loading...
+          </div>
+          );
+        }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
 
@@ -49,8 +59,8 @@ export default function Blog() {
           </h1>
 
           <p className="mt-4 text-lg text-cyan-100">
-               <span className="text-white font-serif ">
-            Sports news, tips, tournaments and community stories.
+            <span className="text-white font-serif ">
+              Sports news, tips, tournaments and community stories.
             </span>
           </p>
 
@@ -61,6 +71,8 @@ export default function Blog() {
             <input
               type="text"
               placeholder="Search articles..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-full border bg-white py-3 pl-12 pr-4 text-black shadow-lg outline-none"
             />
 
@@ -74,10 +86,9 @@ export default function Blog() {
       <section className="mx-auto max-w-6xl px-6 py-16">
 
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-slate-900 md:grid md:grid-cols-2">
-
           <img
-            src={blogs[0].image}
-            alt={blogs[0].title}
+            src={featuredBlog.image}
+            alt={featuredBlog.title}
             className="h-80 w-full object-cover"
           />
 
@@ -88,18 +99,20 @@ export default function Blog() {
             </span>
 
             <h2 className="mt-4 text-4xl font-bold dark:text-white">
-              {blogs[0].title}
+              {featuredBlog.title}
             </h2>
 
             <p className="mt-4 text-gray-600 dark:text-gray-300">
-              {blogs[0].description}
+              {featuredBlog.description}
             </p>
 
-            <button className="mt-8 flex w-fit items-center gap-2 rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700">
+            <Link
+              to={`/blogs/${featuredBlog.id}`}
+              className="mt-8 flex w-fit items-center gap-2 rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
+            >
               Read Article
               <ArrowRight size={18} />
-            </button>
-
+            </Link>
           </div>
 
         </div>
@@ -116,7 +129,7 @@ export default function Blog() {
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 
-          {blogs.map((blog) => (
+          {filteredBlogs.map((blog) => (
 
             <div
               key={blog.id}
@@ -157,10 +170,13 @@ export default function Blog() {
 
                 </div>
 
-                <button className="mt-6 flex items-center gap-2 font-semibold text-cyan-600 hover:text-cyan-700">
+                <Link
+                  to={`/blogs/${blog.id}`}
+                  className="mt-6 flex items-center gap-2 font-semibold text-cyan-600 hover:text-cyan-700"
+                >
                   Read More
                   <ArrowRight size={18} />
-                </button>
+                </Link>
 
               </div>
 
@@ -176,15 +192,17 @@ export default function Blog() {
 
       <section className="pb-20 px-6">
 
-        <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-r from-cyan-600 to-blue-700 p-10 text-center text-white">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-r from-cyan-500 to-blue-500 p-10 text-center text-white">
 
           <h2 className="text-3xl font-bold">
             Never Miss a Sports Update
           </h2>
 
-          <p className="mt-3 text-cyan-100">
-            Subscribe to receive sports news, tournament announcements,
-            and training tips.
+          <p className="mt-3">
+            <span className="text-lg text-white">
+              Subscribe to receive sports news, tournament announcements,
+              and training tips.
+            </span>
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -192,10 +210,14 @@ export default function Blog() {
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 rounded-xl p-4 text-black outline-none"
+              value={email}
+              className="flex-1 rounded-xl p-4 text-white  outline focus:outline-white placeholder:text-gray-200"
+              onChange={(e) => setEmail(e.target.value)}
             />
 
-            <button className="rounded-xl bg-white px-8 py-4 font-semibold text-blue-700 hover:bg-slate-100">
+            <button
+              className="rounded-xl bg-white px-8 py-4 font-semibold text-blue-700"
+            >
               Subscribe
             </button>
 
@@ -203,8 +225,8 @@ export default function Blog() {
 
         </div>
 
-      </section>
+      </section >
 
-    </div>
+    </div >
   );
 }

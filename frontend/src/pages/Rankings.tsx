@@ -46,7 +46,11 @@ export default function Rankings() {
               Leaderboards &{" "}
               <span className="bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">Statistics</span>
             </h1>
-            <p className="mt-3 max-w-xl text-muted-foreground">Track team and player performance.</p>
+            <p className="mt-3 max-w-xl text-muted-foreground">
+              <span className='text-white'>
+              Track team and player performance.
+              </span>
+              </p>
           </div>
         </div>
       </section>

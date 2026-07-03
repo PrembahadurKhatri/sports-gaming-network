@@ -18,7 +18,7 @@ import Services from "./pages/services"
 import AboutUs from "./pages/aboutus"
 import Blog from "./pages/blog"
 import Partners from "./pages/partners"
-
+import Subscribe from "./pages/Subscribe"
 export default function App() {
   return (
     <BrowserRouter>
@@ -42,6 +42,7 @@ export default function App() {
             <Route path="/aboutus" element={<AboutUs/>}/>
             <Route path="/blog" element={<Blog/>}/>
             <Route path="/partners" element={<Partners/>}/>
+            <Route path="/subscribe" element={<Subscribe/>}/>
           </Routes>
         </main>
         <Footer />

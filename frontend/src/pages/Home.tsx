@@ -107,9 +107,11 @@ export default function Home() {
           </h1>
 
           {/* Description */}
-          <p className="mt-5 max-w-2xl mx-auto text-lg text-gray-300 md:text-xl">
+          <p className="mt-5 max-w-2xl mx-auto text-lg  md:text-xl">
+            <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
             Find teammates, join tournaments, book grounds, and track your stats.
             Cricket, Football, Volleyball, Basketball & more.
+            </span>
           </p>
 
           {/* Buttons */}
@@ -139,15 +141,15 @@ export default function Home() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
             
             <span className="flex items-center gap-2">
-              <UsersIcon className="size-4 text-cyan-400" /> 10,000+ Players
+              <UsersIcon className="size-4 text-cyan-400" /> 500+ Players
             </span>
 
             <span className="flex items-center gap-2">
-              <TrophyIcon className="size-4 text-yellow-400" /> 500+ Tournaments
+              <TrophyIcon className="size-4 text-yellow-400" /> 20+ Tournaments
             </span>
 
             <span className="flex items-center gap-2">
-              <MapPinIcon className="size-4 text-green-400" /> 200+ Grounds
+              <MapPinIcon className="size-4 text-green-400" /> 10+ Grounds
             </span>
 
           </div>
@@ -267,7 +269,7 @@ export default function Home() {
                     ))}
                   </ul>
                   <Button className={`mt-6 w-full ${plan.highlighted ? "bg-gradient-to-r from-violet-600 to-indigo-600" : ""}`} variant={plan.highlighted ? "default" : "outline"} asChild>
-                    <Link to="/player-registration">{plan.title === "Free" ? "Join Free" : "Get Started"}</Link>
+                    <Link to="/subscribe">{plan.title === "Free" ? "Join Free" : "Get Started"}</Link>
                   </Button>
                 </CardContent>
               </Card>

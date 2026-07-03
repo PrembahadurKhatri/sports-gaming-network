@@ -62,7 +62,9 @@ export default function Tournaments() {
               <span className="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">Conquer</span>
             </h1>
             <p className="mt-3 max-w-xl text-muted-foreground">
+              <span className='text-white'>
               Join tournaments near you or create your own. Minimum 5 teams required.
+              </span>
             </p>
             <Button size="lg" className="mt-6 bg-gradient-to-r from-amber-600 to-orange-600" asChild>
               <Link to="/tournaments/create"><PlusIcon className="mr-1.5 size-4" /> Create Tournament</Link>

@@ -44,7 +44,9 @@ export default function FindTeams() {
               <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Play Together</span>
             </h1>
             <p className="mt-3 max-w-xl text-muted-foreground">
+                <span className="text-white">
               Browse teams looking for players. Filter by sport and location to find your perfect squad.
+              </span>
             </p>
           </div>
           <div className="mt-8 mx-auto flex max-w-2xl gap-3">

@@ -8,13 +8,11 @@ router.post("/upload",upload.single("image"),
 async(req,res)=>{
     try{
         const result = await new Promise((resolve,reject) => {
-            cloudinary.uploader.upload_stream({
-                folder:"sports_gaming_network",
-            },
+            cloudinary.uploader.upload_stream({folder:"sports_gaming_network",},
         (error,result)=>{
             if(error) reject (error);
-        else resolve(result);
-        })
+            else resolve(result);
+            })
         .end(req.file.buffer);//Multer stored the image in RAM
         });
         res.json(result);//You send it back to React.

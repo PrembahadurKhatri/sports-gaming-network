@@ -1,0 +1,29 @@
+Step 1: Build "My Teams"
+This endpoint returns only the teams created by the logged-in user.
+GET /api/teams/my-teams
+Flow:
+Frontend
+     │
+GET /my-teams
+     │
+Authorization: Bearer token
+     │
+verifyToken
+     │
+req.user.userId
+     │
+Controller
+     │
+Service
+     │
+MongoDB
+
+Step 3: Controller
+Create a new controller function.
+Responsibilities:
+1. Read logged in user's id
+const ownerId = req.user.userId
+2. Call service
+3. Return response
+
+Exactly like your Register controller.

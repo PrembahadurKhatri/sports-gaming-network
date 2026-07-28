@@ -84,83 +84,108 @@ const PRICING = [
 export default function Home() {
   return (
       <div className="flex flex-col">
-      <section className="relative flex flex-col items-center justify-center sm:h-206 h-220 px-4 py-24 md:py-36 overflow-hidden 
-      bg-gradient-to-br from-[#0f172a] via-[#020617] to-black">
+<section className="relative h-screen w-full overflow-hidden">
 
-        {/* Glow Effect */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.25)_0%,transparent_60%)]" />
+  {/* Background Image */}
+  <img
+    src="/home.png"
+    alt="Hero"
+    className="absolute inset-0 h-full w-full object-cover"
+  />
 
-        <div className="relative z-10 mx-auto max-w-4xl text-center">
-          
-          {/* Badge */}
-          <Badge className="mb-4 px-4 py-1.5 text-xs bg-white/10 text-white border border-white/20 backdrop-blur-md">
-            Nepal's #1 Sports & Gaming Network
-          </Badge>
+  {/* Dark Overlay */}
+  <div className="absolute inset-0 bg-black/65" />
 
-          {/* Heading */}
-          <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl text-white">
-            Your{" "}
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
-              Sports Community
-            </span>{" "}
-            Awaits
-          </h1>
+  {/* Glow */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.25)_0%,transparent_60%)]" />
 
-          {/* Description */}
-          <p className="mt-5 max-w-2xl mx-auto text-lg  md:text-xl">
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
-            Find teammates, join tournaments, book grounds, and track your stats.
-            Cricket, Football, Volleyball, Basketball & more.
-            </span>
-          </p>
+  {/* Content */}
+  <div className="relative z-10 flex h-full items-center justify-center px-6">
 
-          {/* Buttons */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-semibold shadow-lg shadow-cyan-500/30 hover:scale-105 transition-all"
-              asChild
-            >
-              <Link to="/player-registration">
-                Get Started Free
-                <ArrowRightIcon className="ml-2 size-4" />
-              </Link>
-            </Button>
+    <div className="mx-auto max-w-4xl text-center">
 
-            <Button
-               size="lg"
-              className="bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-semibold shadow-lg shadow-cyan-500/30 hover:scale-105 transition-all"
-              asChild
-            >
-              <Link to="/find-teams">Find a Team</Link>
-            </Button>
-          </div>
+      {/* Badge */}
+      <Badge className="mb-4 px-4 py-1.5 text-xs bg-white/10 text-white border border-white/20 backdrop-blur-md">
+        Nepal's #1 Sports & Gaming Network
+      </Badge>
 
-          {/* Stats */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
-            
-            <span className="flex items-center gap-2">
-              <UsersIcon className="size-4 text-cyan-400" /> 500+ Players
-            </span>
+      {/* Heading */}
+      <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight text-white">
+        Your{" "}
+        <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+          Sports Community
+        </span>{" "}
+        Awaits
+      </h1>
 
-            <span className="flex items-center gap-2">
-              <TrophyIcon className="size-4 text-yellow-400" /> 20+ Tournaments
-            </span>
+      {/* Description */}
+      <p className="mt-5 max-w-2xl mx-auto text-lg md:text-xl text-white">
+       <span className="text-gray-200"> Find teammates, join tournaments, book grounds, and track your stats.
+        Cricket, Football, Volleyball, Basketball & more.
+      </span>
+      </p>
 
-            <span className="flex items-center gap-2">
-              <MapPinIcon className="size-4 text-green-400" /> 10+ Grounds
-            </span>
+      {/* Buttons */}
+      <div className="mt-8 flex flex-wrap justify-center gap-4">
 
-          </div>
-        </div>
-      </section>
+        <Button
+          size="lg"
+          className="bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-semibold"
+          asChild
+        >
+          <Link to="/player-registration">
+            Get Started Free
+            <ArrowRightIcon className="ml-2 size-4" />
+          </Link>
+        </Button>
+
+        <Button
+          size="lg"
+          variant="outline"
+          className="border-white text-white hover:bg-white hover:text-black"
+          asChild
+        >
+          <Link to="/find-teams" className="text-black dark:text-white">
+            Find a Team
+          </Link>
+        </Button>
+
+      </div>
+
+      {/* Stats */}
+      <div className="mt-10 flex flex-wrap justify-center gap-8 text-white">
+
+        <span className="flex items-center gap-2">
+          <UsersIcon className="text-cyan-400" />
+          500+ Players
+        </span>
+
+        <span className="flex items-center gap-2">
+          <TrophyIcon className="text-yellow-400" />
+          20+ Tournaments
+        </span>
+
+        <span className="flex items-center gap-2">
+          <MapPinIcon className="text-green-400" />
+          10+ Grounds
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 
       <section className="px-4 py-16 md:py-24 bg-muted/30">
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Explore Sports</h2>
-            <p className="mt-2 text-muted-foreground">From cricket to kabaddi — find your game</p>
+            <p className="mt-2 text-muted-foreground">
+              <span className="text-gray-700 dark:text-white">
+              From cricket to kabaddi — find your game
+              </span></p>
           </div>
           <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             {SPORTS.map((sport) => (
@@ -183,8 +208,10 @@ export default function Home() {
       <section className="px-4 py-20 md:py-28">
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Everything You Need</h2>
-            <p className="mt-2 text-muted-foreground">One platform for the entire sports ecosystem</p>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Everything You Need</h2>
+            <p className="mt-2 text-muted-foreground">
+                  <span className="text-gray-700 dark:text-white">One platform for the entire sports ecosystem</span></p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map((feature) => (

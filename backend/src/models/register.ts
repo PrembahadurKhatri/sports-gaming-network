@@ -17,19 +17,34 @@ const userSchema = new Schema(
             lowercase: true,
             trim: true,
             index: true,
-             match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
+            match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
         },
 
         phoneNumber: {
             type: String,
+            trim: true,
             required: true,
-            minlength:10,
-            maxlength:15
+            minlength: 10,
+            maxlength: 15
         },
-
+        province: {
+            type: String,
+            enum: [
+                "",
+                "Koshi",
+                "Madhesh",
+                "Bagmati",
+                "Gandaki",
+                "Lumbini",
+                "Karnali",
+                "Sudurpashchim",
+            ],
+            default: "",
+        },
         password: {
             type: String,
             required: true,
+            trim: true,
         },
 
         location: {
@@ -46,7 +61,7 @@ const userSchema = new Schema(
         age: {
             type: Number,
             required: true,
-            min:13
+            min: 13
         },
 
         gender: {
@@ -78,7 +93,35 @@ const userSchema = new Schema(
         },
         position: {
             type: String,
-            required: true
+            required: true,
+            enum: [
+                "Batsman",
+                "Bowler",
+                "All-rounder",
+                "Wicket Keeper",
+                "Captain",
+                "Goalkeeper",
+                "Defender",
+                "Midfielder",
+                "Forward",
+                "Point Guard",
+                "Shooting Guard",
+                "Small Forward",
+                "Power Forward",
+                "Center",
+                "Setter",
+                "Spiker",
+                "Blocker",
+                "Libero",
+                "Server",
+                "Wing",
+                "Back",
+                "Pivot",
+                "Raider",
+                "Singles",
+                "Doubles",
+                "Mixed Doubles",
+            ],
         },
         skillLevel: {
             type: String,
@@ -89,6 +132,20 @@ const userSchema = new Schema(
                 "Professional",
             ],
             required: true,
+        },
+        role: {
+            type: String,
+            enum: ["player", "admin"],
+            default: "player"
+        },
+        status: {
+            type: String,
+            enum: ["pending", "approved", "rejected","cancelled"],
+            default: "pending"
+        },
+        isRegisteredPlayer: {
+            type: Boolean,
+            default: false,
         },
     },
     {

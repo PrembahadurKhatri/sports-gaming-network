@@ -1,0 +1,146 @@
+/*
+password: _password
+भनेको
+const _password = existingUsers.password;
+अर्थात password निकालेर _password भन्ने variable मा राख्यो।
+_password नाम किन?
+किनकि हामी त्यसलाई प्रयोग गर्ने योजना छैन। _ राख्दा "यो intentionally unused variable हो" भन्ने संकेत हुन्छ।
+
+...userResponse
+को अर्थ:
+बाँकी सबै properties userResponse मा राख।
+अब:
+userResponse
+हुन्छ:
+{
+   fullName: "Sahil",
+   email: "sahil@gmail.com",
+   age: 22,
+   location: "Pokhara"
+}
+Password छैन।
+
+
+
+तपाईंको project को लागि म यही roadmap follow गराउँछु
+Phase 1
+✅ Register
+✅ Login
+⏭ JWT
+⏭ verifyToken middleware
+⏭ Protected routes
+Phase 2
+⏭ Admin Login
+⏭ Admin Dashboard
+⏭ Pending registrations
+⏭ Approve / Reject players
+Phase 3
+⏭ Forgot Password
+⏭ Reset Password
+⏭ Email Verification
+
+or
+
+✅ Register
+✅ Login
+⬇
+✅ JWT
+⬇
+✅ Auth Middleware (verifyToken)
+⬇
+✅ Protected Routes
+⬇
+✅ Admin Login
+⬇
+✅ Admin Dashboard
+⬇
+✅ Approve / Reject Players
+⬇
+✅ Forgot Password
+⬇
+✅ Reset Password
+
+
+
+*/
+
+Authentication ✅
+
+Player
+✔ Register
+✔ Login
+✔ Get Profile
+✔ Get Player By ID
+⬜ Update Player
+⬜ Delete Player
+
+Team
+✔ Register
+✔ My Teams
+✔ Get Team By ID
+⬜ Update Team
+⬜ Delete Team
+⬜ Search Teams
+⏳ Remove Member
+⏳ Leave Team
+
+Join Request
+⬜ Send Request
+⬜ View Requests
+⬜ Accept
+⬜ Reject
+⬜ Leave Team
+⬜ Remove Member
+
+Tournament
+⬜ CRUD
+⬜ Register Team
+⬜ Fixtures
+Fixtures
+⏳ Points Table
+⏳ Winner
+
+Match
+⬜ Create Match
+⬜ Results
+⬜ Scoreboard
+Update Match
+⏳ Match Result
+⏳ Live Score (optional)
+⏳ Match Statistics
+
+Notifications
+Join request received
+Request accepted
+Request rejected
+Tournament invitation
+Match reminder
+
+
+Chat
+Player ↔ Team Chat
+Team Group Chat
+Tournament Chat
+
+Admin Panel
+Dashboard
+Manage Players
+Manage Teams
+Manage Tournaments
+Ban User
+Reports
+
+For a sports networking platform, do not store team ranking manually. Instead, calculate it from match results. This is how real platforms work.
+
+Next implement:
+
+✅ Join Request model
+✅ Send Join Request
+✅ View Pending Requests
+✅ Accept Request
+✅ Reject Request
+✅ Leave Team
+✅ Remove Member
+✅ Transfer Ownership (optional, useful if an owner wants to leave)
+✅ Team Rankings
+✅ Match System / Tournament System

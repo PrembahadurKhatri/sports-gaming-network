@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
 import { Input } from "@/components/ui/Input"
 import { Separator } from "@/components/ui/Separator"
-import { CameraIcon, CheckCircleIcon } from "lucide-react"
+import { CameraIcon } from "lucide-react"
 import Card3D from "@/components/Card3D"
-import axios, { isAxiosError } from "axios";
+import { useAuth } from "@/context/AuthContext"
+import axios from "axios";
 const SPORTS = ["Cricket", "Football", "Volleyball", "Handball", "Basketball", "Hockey", "Tennis", "Badminton", "Futsal", "Kabaddi"]
 const SKILL_LEVELS = ["Beginner", "Intermediate", "Advanced", "Professional"]
 const API_URL = import.meta.env.VITE_API_URL;
@@ -24,13 +26,25 @@ const POSITIONS: Record<string, string[]> = {
   Futsal: ["Goalkeeper", "Defender", "Winger", "Pivot"],
   Kabaddi: ["Raider", "Defender", "All-rounder"],
 }
-
+const PROVINCES = [
+  "Koshi",
+  "Madhesh",
+  "Bagmati",
+  "Gandaki",
+  "Lumbini",
+  "Karnali",
+  "Sudurpashchim",
+];
 export default function PlayerRegistration() {
+  const navigate = useNavigate()
+  const { login } = useAuth()
   const [step, setStep] = useState(1)
   const [selectedSports, setSelectedSports] = useState<string[]>([])
   const [selectedPositions, setSelectedPositions] = useState<string[]>([])
-  const [formData, setFormData] = useState({ fullName: "", email: "", password: "", age: "", phone: "", location: "", bio: "", skillLevel: "" })
-  const [errors, setErrors] = useState({ fullName: "", email: "", password: "", location: "", phone: "", age: "", });
+  const [formData, setFormData] = useState({ fullname: "", email: "", password: "", gender: "", age: "", phoneNumber
+    : "", location: "", province: "", bio: "", skillLevel: "" })
+  const [errors, setErrors] = useState({ fullname: "", email: "", password: "", location: "", province: "", gender: "", phoneNumber: "",
+     age: "", });
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState("");
   const [preview, setPreview] = useState("");
@@ -84,22 +98,13 @@ export default function PlayerRegistration() {
     const num = Number(age);
     return num >= 13 && num <= 100;
   };
-  const validateLocation = (location: string) => {
+  const validateLocation = (location: string = "") => {
     return /^[A-Za-z\s]{2,}$/.test(location.trim());
   };
-
-
-  /*
-  const handleSubmit = async () => {
-      // validation
-      const form = new FormData();
-      // append all fields
-      // append image
-      // append sports
-      // append positions
-      // axios.post(...)
-  }
-  */
+  const validateProvince = (province: string = "") => {
+  return province.trim() !== "";
+};
+ 
   const handleSubmit = async () => {
     //validate
     if (!profilePhoto) {
@@ -107,26 +112,50 @@ export default function PlayerRegistration() {
       alert("Profile photo is required");
       return;
     }
+    if (!formData.gender) {
+      setErrors((prev) => ({
+        ...prev,
+        gender: "Please select your gender.",
+      }));
+      return;
+    }
     setLoading(true);
     try {
       const form = new FormData();//Create a FormData object becasue we are sending multipart/form-data to the backend
-      form.append("fullName", formData.fullName);//append method is used to add new value onto an existing FormData object.
+      form.append("fullname", formData.fullname);//append method is used to add new value onto an existing FormData object.
       //it takes two argument they are key and value.
       form.append("email", formData.email);
       form.append("password", formData.password);
       form.append("age", formData.age);
-      form.append("phone", formData.phone);
+      form.append("gender", formData.gender);
+      form.append("phoneNumber", formData.phoneNumber);
       form.append("location", formData.location);
+      form.append("province", formData.province);
       form.append("bio", formData.bio);
       form.append("skillLevel", formData.skillLevel);//this is not a array why because skilllevel is single value not multiple values
-      form.append("sports", JSON.stringify(selectedSports));
-      form.append("positions", JSON.stringify(selectedPositions));//array lai string ma convert garera pathaune
+      // The player model stores one sport and one position, not JSON arrays.
+      form.append("sport", selectedSports[0]);
+      form.append("position", selectedPositions[0]);
       form.append("profilePhoto", profilePhoto);//append the profile photo to the form data
 
       await axios.post( //send the form data to the backend
         `${API_URL}/api/auth/register`,//backend endpoint 
         form //form data to be sent
       );
+
+      // Registration does not issue a token, so sign in once automatically.
+      const loginResponse = await axios.post(`${API_URL}/api/auth/login`, {
+        email: formData.email,
+        password: formData.password,
+      });
+      const { token, user } = loginResponse.data;
+
+      if (!token || !user) {
+        throw new Error("Registration succeeded, but automatic sign-in failed. Please log in.");
+      }
+
+      login(user, token);
+      navigate(user.role === "admin" ? "/team-dashboard" : "/user-dashboard");
     } catch (error) {
       if (axios.isAxiosError(error)) {//check if the error is an axios error
         console.log(error.response?.data);//log the error response data if it exists
@@ -146,19 +175,23 @@ export default function PlayerRegistration() {
 
   const handleNext = () => {
     const newErrors = {
-      fullName: "",
+      fullname: "",
       email: "",
       password: "",
-      phone: "",
+      phoneNumber: "",
       age: "",
-      location: ""
+      gender: "",
+      location: "",
+      province: ""
     };
 
-    if (formData.fullName.trim().length < 3) {
-      newErrors.fullName = "Full name must be at least 3 characters.";
+    if (formData.fullname.trim().length < 3) {
+      newErrors.fullname = "Full name must be at least 3 characters.";
 
     }
-
+ if (!validateProvince(formData.province)) {
+    newErrors.province = "Please select a province.";
+  }
     if (!validateEmail(formData.email)) {
       newErrors.email = "Enter a valid email.";
 
@@ -166,8 +199,8 @@ export default function PlayerRegistration() {
     if (!validateLocation(formData.location)) {
       newErrors.location = "Enter location of your city";
     }
-    if (!validatePhone(formData.phone)) {
-      newErrors.phone = "Enter a valid Nepal phone number.";
+    if (!validatePhone(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Enter a valid Nepal phone number.";
     }
 
     if (!validatePassword(formData.password)) {
@@ -182,12 +215,13 @@ export default function PlayerRegistration() {
     setErrors(newErrors);
 
     if (
-      newErrors.fullName ||
+      newErrors.fullname ||
       newErrors.email ||
-      newErrors.phone ||
+      newErrors.phoneNumber ||
       newErrors.password ||
       newErrors.age ||
-      newErrors.location
+      newErrors.location ||
+      newErrors.province
     ) {
       return;
     }
@@ -197,11 +231,14 @@ export default function PlayerRegistration() {
 
 
   function toggleSport(sport: string) {
-    setSelectedSports((prev) => prev.includes(sport) ? prev.filter((s) => s !== sport) : [...prev, sport])
+    // The backend schema accepts one sport only.
+    setSelectedSports((prev) => prev[0] === sport ? [] : [sport])
+    setSelectedPositions([])
   }
 
   function togglePosition(pos: string) {
-    setSelectedPositions((prev) => prev.includes(pos) ? prev.filter((p) => p !== pos) : [...prev, pos])
+    // The backend schema accepts one position only.
+    setSelectedPositions((prev) => prev[0] === pos ? [] : [pos])
   }
 
   const allPositions = [...new Set(selectedSports.flatMap((s) => POSITIONS[s] || []))]
@@ -249,52 +286,129 @@ export default function PlayerRegistration() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Full Name *</label>
-                    <Input placeholder="Your full name" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
-                    <p style={{ color: "red" }}>{errors.fullName}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Phone Number *</label>
-                    <Input placeholder="98XXXXXXXX" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                    {errors.phone && (
-                      <p style={{ color: "red" }}>{errors.phone}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Email *</label>
-                    <Input type="email" placeholder="your@email.com" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                    {errors.email && (
-                      <p style={{ color: "red" }}>{errors.email}</p>
-                    )}
+                    <Input placeholder="Your full name" value={formData.fullname} onChange={(e) => setFormData({ ...formData, fullname: e.target.value })} />
+                    <p style={{ color: "red" }}>{errors.fullname}</p>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Password</label>
-                    <Input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
-                    {errors.password && (
-                      <p style={{ color: "red" }}>{errors.password}</p>
-                    )}
-                  </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Location / City *</label>
-                    <Input placeholder="Kathmandu" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
-                    {errors.location && (
-                      <p style={{ color: "red" }}>{errors.location}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Age:</label>
-                    <Input
-                      type="number"
-                      placeholder="Enter your age"
-                      value={formData.age}
-                      onChange={(e) =>
-                        setFormData({ ...formData, age: e.target.value })
-                      }
-                    />
-                    {errors.age && (
-                      <p style={{ color: "red" }}>{errors.age}</p>
-                    )}
+
+                  <p className="text-red-500 text-sm">{errors.gender}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Phone Number *</label>
+                  <Input placeholder="98XXXXXXXX" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} />
+                  {errors.phoneNumber && (
+                    <p style={{ color: "red" }}>{errors.phoneNumber}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email *</label>
+                  <Input type="email" placeholder="your@email.com" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                  {errors.email && (
+                    <p style={{ color: "red" }}>{errors.email}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Password</label>
+                  <Input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                  {errors.password && (
+                    <p style={{ color: "red" }}>{errors.password}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Location / City *</label>
+                  <Input placeholder="Pokhara" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
+                  {errors.location && (
+                    <p style={{ color: "red" }}>{errors.location}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Province *</label>
+
+                  <select
+                    value={formData.province}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        province: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  >
+                    <option value="">Select Province</option>
+
+                    {PROVINCES.map((province) => (
+                      <option key={province} value={province}>
+                        {province}
+                      </option>
+                    ))}
+                  </select>
+
+                  {errors.province && (
+                    <p className="text-red-500 text-sm">{errors.province}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Age:</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter your age"
+                    value={formData.age}
+                    onChange={(e) =>
+                      setFormData({ ...formData, age: e.target.value })
+                    }
+                  />
+                  {errors.age && (
+                    <p style={{ color: "red" }}>{errors.age}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Gender</label>
+
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="Male"
+                        checked={formData.gender === "Male"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, gender: e.target.value })
+                        }
+                      />
+                      Male
+                    </label>
+
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="Female"
+                        checked={formData.gender === "Female"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, gender: e.target.value })
+                        }
+                      />
+                      Female
+                    </label>
+
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="Other"
+                        checked={formData.gender === "Other"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, gender: e.target.value })
+                        }
+                      />
+                      Other
+                    </label>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -398,7 +512,7 @@ export default function PlayerRegistration() {
                   </p>
 
                   {photoError && (
-                    <p className="bg-red-500 rounded px-2  text-sm font-serif" style={{color:"white"}}>
+                    <p className="bg-red-500 rounded px-2  text-sm font-serif" style={{ color: "white" }}>
                       {photoError}
                     </p>
                   )}
@@ -406,9 +520,9 @@ export default function PlayerRegistration() {
                 </div>
                 <Separator />
                 <div className="rounded-lg bg-muted/30 p-4">
-                  <p className="mb-2 text-xl font-serif font-medium bg-gray-200 text-center"  style={{color:'blue'}}>Profile Summary</p>
+                  <p className="mb-2 text-xl font-serif font-medium bg-gray-200 text-center" style={{ color: 'blue' }}>Profile Summary</p>
                   <div className="space-y-1 text-sm text-muted-foreground">
-                    <p ><span className="font-medium text-foreground ">Name:</span> <span className="text-violet-500">{formData.fullName}</span></p>
+                    <p ><span className="font-medium text-foreground ">Name:</span> <span className="text-violet-500">{formData.fullname}</span></p>
                     <p><span className="font-medium text-foreground">Location:</span> <span className="text-violet-500">{formData.location}</span></p>
                     <p><span className="font-medium text-foreground">Sports:</span> <span className="text-violet-500">{selectedSports.join(", ")}</span></p>
                     <p><span className="font-medium text-foreground">Skills:</span> <span className="text-violet-500">{selectedPositions.join(", ")}</span></p>
@@ -419,7 +533,7 @@ export default function PlayerRegistration() {
                   <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
 
                   <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 gap-1.5"
-                    disabled={loading}  onClick={handleSubmit}>
+                    disabled={loading} onClick={handleSubmit}>
                     {loading ? "Registering..." : "Submit Registration"}
                   </Button>
 

@@ -627,6 +627,21 @@ export const searchTeams = async (query: any) => {
   };
 };
 
+export const checkTeamName = async (teamName: string) => {
+  if (!teamName || !teamName.trim()) {
+    throw new Error("Team name is required.");
+  }
+
+  const existing = await Team.findOne({
+    teamName: { $regex: `^${teamName.trim()}$`, $options: "i" },
+  });
+
+  return {
+    success: true,
+    available: !existing,
+    message: existing ? "Team name already taken." : "Team name is available.",
+  };
+};
 
 export const invitePlayer = async (
   teamId: string,

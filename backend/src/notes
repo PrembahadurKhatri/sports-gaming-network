@@ -27,3 +27,29 @@ const ownerId = req.user.userId
 3. Return response
 
 Exactly like your Register controller.
+
+
+interface is not required for Mongoose to work. Your code will still run without it.
+However, in TypeScript, interfaces provide type safety, IntelliSense (autocomplete), and compile-time error checking.
+
+
+Hash generate गर्छ
+HMAC generate गर्छ
+UUID generate गर्छ
+Encryption
+Decryption
+Random bytes generate गर्छ
+जस्ता security सम्बन्धी काम गर्छ।
+
+
+HMAC =Hash Message Authentication Code
+Message
++
+Secret Key
+बाट एउटा unique signature बनाउँछ।
+ 
+    return crypto
+        .createHmac("sha256", process.env.ESEWA_SECRET_KEY!)//यसले एउटा HMAC object बनाउँछ।
+        .update(message)//"यो message लाई hash गर।"
+        .digest("base64");//"अब final hash निकाल।"
+};

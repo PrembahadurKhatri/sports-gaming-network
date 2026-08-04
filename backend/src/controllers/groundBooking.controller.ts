@@ -93,7 +93,7 @@ export const rejectBookingController = async (
   res: Response
 ) => {
   try {
-    const ownerId = (req as any).user.id;
+    const ownerId = req.user.id;
 
     const result = await rejectBooking(
       req.params.bookingId as string,
@@ -114,7 +114,7 @@ export const cancelBookingController = async (
   res: Response
 ) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = req.user.id;
 
     const result = await cancelBooking(
       req.params.bookingId as string,

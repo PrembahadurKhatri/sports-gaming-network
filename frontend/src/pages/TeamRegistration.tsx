@@ -7,9 +7,7 @@ import { Input } from "@/components/ui/Input"
 import { Separator } from "@/components/ui/Separator"
 import { CameraIcon, CheckCircle2, XCircle, Plus, Trash2, Globe, Lock, Loader2 } from "lucide-react"
 import Card3D from "@/components/Card3D"
-import axios from "axios"
-
-const API_URL = import.meta.env.VITE_API_URL
+import api from "@/api/axios"
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -131,12 +129,12 @@ export default function TeamRegistration() {
     if (nameTimer.current) clearTimeout(nameTimer.current)
     nameTimer.current = setTimeout(async () => {
       try {
-        const { data } = await axios.get(`${API_URL}/api/teams/check-name`, {
+        const { data } = await api.get("/teams/check-name", {
           params: { name: form.teamName.trim() },
         })
         setNameStatus(data.available ? "available" : "taken")
       } catch {
-        setNameStatus("idle") // endpoint may not exist yet
+        setNameStatus("idle")
       }
     }, 700)
     return () => { if (nameTimer.current) clearTimeout(nameTimer.current) }
@@ -231,16 +229,17 @@ export default function TeamRegistration() {
       fd.append("tournamentExperience", String(form.tournamentExperience))
       fd.append("customQuestions", JSON.stringify(form.customQuestions))
       fd.append("teamLogo", logoFile)
-      const res = await axios.post(`${API_URL}/api/teams/register`, fd)
+      const res = await api.post("/teams/register", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
       const teamId = res.data?.team?._id
       if (teamId) {
         navigate(`/team-dashboard?teamId=${teamId}`)
       } else {
         setStep(4)
       }
-    } catch (err) {
-      if (axios.isAxiosError(err)) setSubmitError(err.response?.data?.message || "Registration failed.")
-      else setSubmitError("Something went wrong.")
+    } catch (err: any) {
+      setSubmitError(err?.response?.data?.message || "Registration failed.")
     } finally { setLoading(false) }
   }
 

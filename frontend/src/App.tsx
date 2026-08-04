@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthContext"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import Chatbot from "@/components/Chatbot"
+import ProtectedRoute from "@/components/ProtectedRoute"
 import Home from "@/pages/Home"
 import FindTeams from "@/pages/FindTeams"
 import FindPlayers from "@/pages/FindPlayers"
@@ -23,6 +24,13 @@ import AboutUs from "@/pages/aboutus"
 import Blog from "@/pages/blog"
 import Partners from "@/pages/partners"
 import Subscribe from "@/pages/Subscribe"
+import TeamDetail from "@/pages/TeamDetail"
+import PlayerDetail from "@/pages/PlayerDetail"
+import TournamentCreate from "@/pages/TournamentCreate"
+import TournamentDetail from "@/pages/TournamentDetail"
+import GroundDetail from "@/pages/GroundDetail"
+import MyBookings from "@/pages/MyBookings"
+import Matches from "@/pages/Matches"
 
 export default function App() {
   return (
@@ -34,15 +42,57 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/find-teams" element={<FindTeams />} />
+              <Route path="/find-teams/:id" element={<TeamDetail />} />
               <Route path="/find-players" element={<FindPlayers />} />
+              <Route path="/find-players/:id" element={<PlayerDetail />} />
               <Route path="/tournaments" element={<Tournaments />} />
+              <Route
+                path="/tournaments/create"
+                element={
+                  <ProtectedRoute>
+                    <TournamentCreate />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/tournaments/:id" element={<TournamentDetail />} />
               <Route path="/grounds" element={<Grounds />} />
+              <Route path="/grounds/:id" element={<GroundDetail />} />
+              <Route
+                path="/my-bookings"
+                element={
+                  <ProtectedRoute>
+                    <MyBookings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/matches"
+                element={
+                  <ProtectedRoute>
+                    <Matches />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/rankings" element={<Rankings />} />
               <Route path="/player-registration" element={<PlayerRegistration />} />
               <Route path="/team-registration" element={<TeamRegistration />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/user-dashboard" element={<UserDashboard />} />
-              <Route path="/team-dashboard" element={<TeamDashboard />} />
+              <Route
+                path="/user-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/team-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <TeamDashboard />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/contact" element={<Contact />} />

@@ -78,7 +78,7 @@ export const loginUser= async (loginData:any) =>{
 }
 export const getPlayerById = async(id:string) =>{
       const player = await User.findById(id)
-        .select("fullname email profilePhoto skillLevel position sport gender")
+        .select("fullname email profilePhoto skillLevel position sport gender age province location bio phoneNumber")
       if (!player) {
         throw new Error("Player  not found.");
       }
@@ -88,6 +88,37 @@ export const getPlayerById = async(id:string) =>{
         player,
       };
 }
+
+export const searchPlayers = async (query: any) => {
+  const filter: any = {};
+
+  if (query.fullname) {
+    filter.fullname = { $regex: query.fullname, $options: "i" };
+  }
+  if (query.sport) {
+    filter.sport = query.sport;
+  }
+  if (query.province) {
+    filter.province = query.province;
+  }
+  if (query.skillLevel) {
+    filter.skillLevel = query.skillLevel;
+  }
+  if (query.position) {
+    filter.position = query.position;
+  }
+
+  const players = await User.find(filter)
+    .select("fullname email profilePhoto skillLevel position sport gender age province location bio")
+    .sort({ createdAt: -1 })
+    .limit(100);
+
+  return {
+    success: true,
+    message: "Players fetched successfully.",
+    players,
+  };
+};
 //update player
 export const updatePlayer = async (
   userId:string,

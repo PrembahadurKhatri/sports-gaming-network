@@ -53,7 +53,7 @@ export const acceptInvitationController = async (
     const playerId = req.user.id;
     const { id } = req.params;
 
-    const result = await acceptInvitation(id, playerId);
+    const result = await acceptInvitation(id as string, playerId);
 
     res.status(200).json(result);
   } catch (error) {
@@ -74,7 +74,7 @@ export const rejectInvitationController = async (
     const playerId = req.user.id;
     const { id } = req.params;
 
-    const result = await rejectInvitation(id, playerId);
+    const result = await rejectInvitation(id as string, playerId);
 
     res.status(200).json(result);
   } catch (error) {
@@ -94,7 +94,7 @@ export const cancelInvitationController = async (
     const ownerId = req.user.id;
     const { id } = req.params;
 
-    const result = await cancelInvitation(id, ownerId);
+    const result = await cancelInvitation(id as string, ownerId);
 
     res.status(200).json(result);
   } catch (error) {

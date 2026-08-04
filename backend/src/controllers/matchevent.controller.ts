@@ -11,7 +11,7 @@ export const addMatchEvent = async (
     res: Response
 ) => {
     try {
-        const userId = (req as any).user.id;
+        const userId = req.user.id;
         const matchId = req.params.matchId;
 
         if (!matchId) {
@@ -22,7 +22,7 @@ export const addMatchEvent = async (
         }
 
         const event = await addEvent(
-            matchId,
+            matchId as string,
             userId,
             req.body
         );
@@ -51,7 +51,7 @@ export const getMatchTimeline = async (
     try {
         const { matchId } = req.params;
 
-        const timeline = await getTimeline(matchId);
+        const timeline = await getTimeline(matchId as string);
 
         return res.status(200).json({
             success: true,
@@ -73,11 +73,11 @@ export const updateMatchEvent = async (
     res: Response
 ) => {
     try {
-        const userId = (req as any).user.id;
+        const userId = req.user.id;
         const { eventId } = req.params;
 
         const event = await updateEvent(
-            eventId,
+            eventId as string,
             userId,
             req.body
         );
@@ -105,11 +105,11 @@ export const deleteMatchEvent = async (
     res: Response
 ) => {
     try {
-        const userId = (req as any).user.id;
+        const userId = req.user.id;
         const { eventId } = req.params;
 
         await deleteEvent(
-            eventId,
+            eventId as string,
             userId
         );
 

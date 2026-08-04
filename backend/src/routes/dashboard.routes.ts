@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {   getPlayerDashboard, getTeamDashboard} from "./../controllers/dashboard.controller"
+import {   getPlayerDashboard, getTeamDashboard,homeStats} from "./../controllers/dashboard.controller"
 import { verifyToken } from "../middleware/verifyToken";
 
 const router = Router();
@@ -15,5 +15,8 @@ router.get(
     verifyToken,
     getTeamDashboard,
 );
+router.get("/home-stats", 
+    verifyToken,
+    homeStats);
 
 export default router;

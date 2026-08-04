@@ -9,6 +9,8 @@ const footerLinks = {
       { href: "/find-players", label: "Find Players" },
       { href: "/tournaments", label: "Tournaments" },
       { href: "/grounds", label: "Grounds" },
+      { href: "/matches", label: "Matches" },
+      { href: "/my-bookings", label: "My Bookings" },
       { href: "/rankings", label: "Rankings" },
     ],
   },

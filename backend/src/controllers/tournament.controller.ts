@@ -2,21 +2,20 @@ import { Request, Response } from "express";
 import {
     createTournament as createTournamentService, getAllTournaments as getAllTournamentService, getTournamentById as getTournamentService
     , updateTournament as updateTournamentService, deleteTournament as deleteTournamentService, registerTeam as registerTeamService, withdrawTeam as withdrawTeamService,
-    startTournament as startTournamentService, getTournamentMVP as getTournamentMVPService  ,generateNextRound as  generateNextRoundService ,finishTournament as finishTournamentService, getFixtures as getFixturesService
+    startTournament as startTournamentService, getTournamentMVP as getTournamentMVPService, generateNextRound as generateNextRoundService, finishTournament as finishTournamentService, getFixtures as getFixturesService
 } from "../services/tournament.service";
 
 export const createTournament = async (req: Request, res: Response) => {
     try {
-  
-        const { id } = req.params;
+        const organizerId = req.user.id;
 
         const result = await createTournamentService(
-            id as string,
+            organizerId,
             req.body,
             req.file
         );
 
-        return res.status(200).json(result);
+        return res.status(201).json(result);
     } catch (error) {
         res.status(400).json({
             success: false,
@@ -25,7 +24,7 @@ export const createTournament = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllTournaments = async (_req: Request, res: Response) => {
+export const getAllTournaments = async (req: Request, res: Response) => {
     try {
         const result = await getAllTournamentService();
         return res.status(200).json(result);
@@ -39,7 +38,7 @@ export const getAllTournaments = async (_req: Request, res: Response) => {
 
 export const getTournamentById = async (req: Request, res: Response) => {
     try {
-        
+
         const result = await getTournamentService(req.params.id as string);
 
         return res.status(200).json(result);
@@ -53,14 +52,14 @@ export const getTournamentById = async (req: Request, res: Response) => {
 
 export const updateTournament = async (req: Request, res: Response) => {
     try {
-       const organizerId = (req as any).user.id;
+        const organizerId = req.user.id;
 
-const result = await updateTournamentService(
-    req.params.id as string,
-    organizerId,
-    req.body,
-    req.file
-);
+        const result = await updateTournamentService(
+            req.params.id as string,
+            organizerId,
+            req.body,
+            req.file
+        );
         return res.status(200).json(result);
     } catch (error) {
         res.status(400).json({
@@ -72,7 +71,7 @@ const result = await updateTournamentService(
 
 export const deleteTournament = async (req: Request, res: Response) => {
     try {
-        const organizerId = (req as any).user.id;
+        const organizerId = req.user.id;
 
         const result = await deleteTournamentService(
             req.params.id as string,
@@ -90,7 +89,7 @@ export const deleteTournament = async (req: Request, res: Response) => {
 
 export const registerTeam = async (req: Request, res: Response) => {
     try {
-        const ownerId = (req as any).user.id;
+        const ownerId = req.user.id;
         const { teamId } = req.body;
 
         const result = await registerTeamService(
@@ -110,7 +109,7 @@ export const registerTeam = async (req: Request, res: Response) => {
 
 export const withdrawTeam = async (req: Request, res: Response) => {
     try {
-        const ownerId = (req as any).user.id;;
+        const ownerId = req.user.id;
         const { teamId } = req.body;
 
         const result = await withdrawTeamService(
@@ -129,7 +128,7 @@ export const withdrawTeam = async (req: Request, res: Response) => {
 
 export const startTournament = async (req: Request, res: Response) => {
     try {
-        const organizerId = (req as any).user.id;;
+        const organizerId = req.user.id;
 
         const result = await startTournamentService(
             req.params.id as string,
@@ -147,7 +146,7 @@ export const startTournament = async (req: Request, res: Response) => {
 
 export const finishTournament = async (req: Request, res: Response) => {
     try {
-        const organizerId =(req as any).user.id;
+        const organizerId = req.user.id;
         const { winnerId } = req.body;
 
         const result = await finishTournamentService(
@@ -180,43 +179,43 @@ export const getFixtures = async (req: Request, res: Response) => {
 
 
 export const generateNextRound = async (
-  req: Request,
-  res: Response
+    req: Request,
+    res: Response
 ) => {
-  try {
-    const organizerId = (req as any).user.id;
+    try {
+        const organizerId = req.user.id;
 
-    const result = await generateNextRoundService(
-      req.params.id as string,
-      organizerId
-    );
+        const result = await generateNextRoundService(
+            req.params.id as string,
+            organizerId
+        );
 
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
 };
 
 export const getTournamentMVPController = async (
-  req: Request,
-  res: Response
+    req: Request,
+    res: Response
 ) => {
-  try {
-    const result = await getTournamentMVPService(
-      req.params.id as string
-    );
+    try {
+        const result = await getTournamentMVPService(
+            req.params.id as string
+        );
 
-    res.status(200).json({
-      success: true,
-      mvp: result,
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
+        res.status(200).json({
+            success: true,
+            mvp: result,
+        });
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
 };

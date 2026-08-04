@@ -1,6 +1,16 @@
-import { Schema, model } from "mongoose";
-
-const paymentSchema = new Schema(
+import { Schema, Types, model } from "mongoose";
+export interface IPayment{
+    booking:Types.ObjectId;
+    user:Types.ObjectId;
+    amount:number;
+    provider:"KHALTI" | "ESEWA" | "FONEPAY";
+    transactionId?: string;
+    pidx:string;
+    method:string;
+        paidAt?: Date;
+    status:"PENDING" | "SUCCESS" |"FAILED";
+}
+const paymentSchema = new Schema<IPayment>(
 {
     booking:{
         type:Schema.Types.ObjectId,
@@ -13,7 +23,16 @@ const paymentSchema = new Schema(
         ref:"Register",
         required:true
     },
-
+    method: {
+    type: String,
+    enum: [
+        "QR",
+        "MOBILE_BANKING",
+        "CARD",
+        "WALLET"
+    ],
+    default: "WALLET"
+},
     amount:{
         type:Number,
         required:true
@@ -21,12 +40,17 @@ const paymentSchema = new Schema(
 
     provider:{
         type:String,
-        enum:["KHALTI","ESEWA","Fonepay"],
+        enum:["KHALTI","ESEWA","FONEPAY"],
         default:"KHALTI"
     },
-
-    transactionId:String,
-
+    transactionId:{
+        type:String,
+        default:null,
+    },
+    paidAt: {
+    type: Date,
+    default: null
+},
   pidx: { //pidx stands for Payment ID Index.
   type: String,
   required: true,
@@ -47,43 +71,10 @@ const paymentSchema = new Schema(
 timestamps:true
 }
 );
+paymentSchema.index({booking:1});
+paymentSchema.index({user:1});
+paymentSchema.index({pidx:1});
 
-export default model("Payment",paymentSchema);
 
-/**
- Payment Flow
-User books ground
-        ↓
-Booking Status = PENDING
-Payment Status = UNPAID
-        ↓
-Click Pay
-        ↓
-Create Khalti Payment
-        ↓
-User Pays
-        ↓
-Khalti Verification
-        ↓
-Payment Status = PAID
-Booking Status = APPROVED
-        ↓
-Notification Sent
-Backend Structure
-src
-│
-├── controllers
-│     payment.controller.ts
-│
-├── services
-│     payment.service.ts
-│
-├── routes
-│     payment.routes.ts
-│
-├── utils
-│     khalti.ts
-│
-└── models
-      payment.ts 
- */
+export default model<IPayment>("Payment", paymentSchema);
+

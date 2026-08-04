@@ -1,6 +1,20 @@
 import { Request,Response } from "express";
 import { getPlayerDashboard as getPlayerDashboardService,getTeamDashboard as getTeamDashboardService} from "../services/dashboard.service";
 
+import { getHomeStats } from "../services/dashboard.service";
+export const homeStats = async (req: Request, res: Response) => {
+  try{
+  const stats = await getHomeStats();
+  res.json(stats);
+    } catch (error) {
+    res.status(400).json({
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Something went wrong.",
+    });
+  }
+};
+
 export const getPlayerDashboard = async (
   req: Request,
   res: Response

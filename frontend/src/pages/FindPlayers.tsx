@@ -1,62 +1,119 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar"
 import { Input } from "@/components/ui/Input"
-import { SearchIcon, MapPinIcon, StarIcon, FilterIcon } from "lucide-react"
+import { SearchIcon, MapPinIcon } from "lucide-react"
 import Card3D from "@/components/Card3D"
+import api from "@/api/axios"
 
 const SPORTS = ["All", "Cricket", "Football", "Volleyball", "Handball", "Basketball", "Hockey", "Tennis", "Badminton", "Futsal", "Kabaddi"]
 
-const SAMPLE_PLAYERS = [
-  { id: 1, name: "Rahul Sharma", sport: "Cricket", location: "Kathmandu", rating: 4.8, matches: 45, skills: ["Batsman", "Bowler"], avatar: "RS" },
-  { id: 2, name: "Anita Thapa", sport: "Football", location: "Pokhara", rating: 4.6, matches: 32, skills: ["Forward", "Captain"], avatar: "AT" },
-  { id: 3, name: "Sujan Maharjan", sport: "Basketball", location: "Lalitpur", rating: 4.9, matches: 28, skills: ["Point Guard", "Shooter"], avatar: "SM" },
-  { id: 4, name: "Priya Gurung", sport: "Volleyball", location: "Biratnagar", rating: 4.7, matches: 38, skills: ["Spiker", "Server"], avatar: "PG" },
-  { id: 5, name: "Amit Shah", sport: "Hockey", location: "Chitwan", rating: 4.5, matches: 22, skills: ["Forward", "Drag Flick"], avatar: "AS" },
-  { id: 6, name: "Sita Rai", sport: "Badminton", location: "Dharan", rating: 4.8, matches: 50, skills: ["Singles", "Doubles"], avatar: "SR" },
-  { id: 7, name: "Bikram Tamang", sport: "Football", location: "Kathmandu", rating: 4.4, matches: 19, skills: ["Midfielder", "Playmaker"], avatar: "BT" },
-  { id: 8, name: "Deepa Karki", sport: "Handball", location: "Nepalgunj", rating: 4.6, matches: 27, skills: ["Wing", "Defender"], avatar: "DK" },
-  { id: 9, name: "Kiran Basnet", sport: "Cricket", location: "Bharatpur", rating: 4.7, matches: 35, skills: ["All-rounder"], avatar: "KB" },
-]
+type Player = {
+  _id: string
+  fullname: string
+  sport: string
+  location?: string
+  province?: string
+  position?: string
+  skillLevel?: string
+  profilePhoto?: string
+}
+
+function initials(name: string) {
+  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "PL"
+}
 
 export default function FindPlayers() {
   const [activeSport, setActiveSport] = useState("All")
   const [search, setSearch] = useState("")
+  const [players, setPlayers] = useState<Player[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const filtered = SAMPLE_PLAYERS.filter((p) => {
-    const matchSport = activeSport === "All" || p.sport === activeSport
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.location.toLowerCase().includes(search.toLowerCase())
-    return matchSport && matchSearch
-  })
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      setLoading(true)
+      setError("")
+      try {
+        const params: Record<string, string> = {}
+        if (activeSport !== "All") params.sport = activeSport
+        if (search.trim()) params.fullname = search.trim()
+        const { data } = await api.get("/auth/players", { params })
+        setPlayers(data.players || [])
+      } catch (err: any) {
+        setError(err?.response?.data?.message || "Failed to load players. Please login and try again.")
+        setPlayers([])
+      } finally {
+        setLoading(false)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [activeSport, search])
 
   return (
     <div className="flex flex-col">
-      <section className="bg-gradient-to-br from-emerald-950 via-green-950 to-teal-950 px-4 py-12 md:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col items-center text-center">
-            <Badge variant="secondary" className="mb-3">Find Players</Badge>
-            <h1 className="text-3xl font-bold tracking-tight md:text-5xl text-white">
-              Find Your{" "}
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Dream Teammates</span>
-            </h1>
-            <p className="mt-3 max-w-xl text-muted-foreground ">
-              <span className="text-white">
-              Browse skilled players looking for teams.
-              </span>
-              </p>
-          </div>
-          <div className="mt-8 mx-auto flex max-w-2xl gap-3">
-            <div className="relative flex-1">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players..." className="pl-9" />
-            </div>
-            <Button variant="outline" size="icon"><FilterIcon className="size-4" /></Button>
-          </div>
-        </div>
-      </section>
+     <section className="relative overflow-hidden py-16 md:py-24">
+
+  {/* Background Image */}
+  <img
+    src="/player.png"
+    alt="Players Background"
+    className="absolute inset-0 h-full w-full object-cover"
+  />
+
+  {/* Dark Overlay */}
+  <div className="absolute inset-0 bg-black/60" />
+
+  {/* Content */}
+  <div className="relative z-10 mx-auto max-w-6xl px-4">
+
+    <div className="flex flex-col items-center text-center">
+
+      <Badge
+        variant="secondary"
+        className="mb-3 bg-white/10 text-white border border-white/20 backdrop-blur-md"
+      >
+        Find Players
+      </Badge>
+
+      <h1 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+        Find Your{" "}
+        <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+          Dream Teammates
+        </span>
+      </h1>
+
+      <p className="mt-3 max-w-xl text-white/80">
+      <span className="text-white">
+        Browse skilled players looking for teams.
+        </span>
+      </p>
+
+    </div>
+
+    <div className="mx-auto mt-8 flex max-w-2xl gap-3">
+
+      <div className="relative flex-1">
+
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-300" />
+
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search players..."
+          className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-gray-300 backdrop-blur-md"
+        />
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 
       <section className="px-4 py-8">
         <div className="mx-auto max-w-6xl">
@@ -74,37 +131,57 @@ export default function FindPlayers() {
 
       <section className="px-4 pb-16">
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((player) => (
-              <Card3D key={player.id}>
-                <Card className="h-full transition-all hover:shadow-lg cursor-pointer">
-                  <CardHeader className="text-center">
-                    <Avatar className="mx-auto size-14">
-                      <AvatarFallback className="bg-gradient-to-br from-emerald-600 to-teal-600 text-white text-lg">{player.avatar}</AvatarFallback>
-                    </Avatar>
-                    <CardTitle className="mt-3 text-lg">{player.name}</CardTitle>
-                    <CardDescription className="flex items-center justify-center gap-1"><MapPinIcon className="size-3.5" />{player.location}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <div className="flex items-center justify-center gap-3 text-sm">
-                      <Badge>{player.sport}</Badge>
-                      <span className="flex items-center gap-1 text-amber-500"><StarIcon className="size-3.5 fill-amber-500" />{player.rating}</span>
-                      <span className="text-muted-foreground">{player.matches} matches</span>
-                    </div>
-                    <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-                      {player.skills.map((skill) => (
-                        <Badge key={skill} variant="secondary" className="text-[10px]">{skill}</Badge>
-                      ))}
-                    </div>
-                    <div className="mt-4 flex gap-2">
-                      <Button className="flex-1" size="sm" asChild><Link to={`/find-players/${player.id}`}>View Profile</Link></Button>
-                      <Button variant="outline" size="sm" className="flex-1" asChild><Link to={`/find-players/${player.id}`}>Invite</Link></Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Card3D>
-            ))}
-          </div>
+          {loading ? (
+            <p className="py-20 text-center text-muted-foreground">Loading players...</p>
+          ) : error ? (
+            <div className="flex flex-col items-center gap-3 py-20 text-center">
+              <p className="text-lg font-medium">{error}</p>
+              <Button asChild><Link to="/login">Login</Link></Button>
+            </div>
+          ) : players.length === 0 ? (
+            <p className="py-20 text-center text-muted-foreground">No players found.</p>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {players.map((player) => (
+                <Card3D key={player._id}>
+                  <Card className="h-full transition-all hover:shadow-lg">
+                    <CardHeader className="text-center">
+                      <Avatar className="mx-auto size-14">
+                        {player.profilePhoto ? (
+                          <img src={player.profilePhoto} alt={player.fullname} className="size-full object-cover rounded-full" />
+                        ) : (
+                          <AvatarFallback className="bg-gradient-to-br from-emerald-600 to-teal-600 text-white text-lg">
+                            {initials(player.fullname)}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <CardTitle className="mt-3 text-lg">{player.fullname}</CardTitle>
+                      <CardDescription className="flex items-center justify-center gap-1">
+                        <MapPinIcon className="size-3.5" />
+                        {player.location || player.province || "Nepal"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-center">
+                      <div className="flex items-center justify-center gap-3 text-sm flex-wrap">
+                        <Badge>{player.sport}</Badge>
+                        {player.skillLevel && <Badge variant="secondary">{player.skillLevel}</Badge>}
+                      </div>
+                      {player.position && (
+                        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                          <Badge variant="secondary" className="text-[10px]">{player.position}</Badge>
+                        </div>
+                      )}
+                      <div className="mt-4">
+                        <Button className="w-full" size="sm" asChild>
+                          <Link to={`/find-players/${player._id}`}>View Profile</Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Card3D>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

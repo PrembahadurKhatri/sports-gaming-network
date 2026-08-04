@@ -74,3 +74,39 @@ body {
   @apply bg-background text-foreground antialiased;
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+@keyframes infiniteScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 12px));
+  }
+}
+
+.animate-scroll {
+  display: flex;
+  width: max-content;
+  animation: infiniteScroll 25s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
+@keyframes infiniteScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 12px));
+  }
+}
+
+.animate-scroll {
+  width: max-content;
+  animation: infiniteScroll 25s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}

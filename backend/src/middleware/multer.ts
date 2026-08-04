@@ -17,10 +17,11 @@ Multer ले image लाई req.file मा राखिदिन्छ।
 
 
 import multer from"multer";//import multer
+//upload object memoryStorage() भनेको यसले uploaded file लाई RAM (Memory) मा राख्छ।
+const storage=multer.memoryStorage();
 
-const storage=multer.memoryStorage();//upload object memoryStorage() भनेको के? यसले uploaded file लाई RAM (Memory) मा राख्छ।
-
-const upload=multer({//Multer को configuration हो। यसले Express लाई भन्छ: "File आयो भने memoryStorage प्रयोग गर।" यसले एउटा middleware return गर्छ।
+//Multer को configuration हो। यसले Express लाई भन्छ: "File आयो भने memoryStorage प्रयोग गर।" यसले एउटा middleware return गर्छ।
+const upload=multer({
     storage,
 });
 

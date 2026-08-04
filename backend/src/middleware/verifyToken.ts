@@ -1,40 +1,57 @@
-import {Request,Response,NextFunction} from "express";
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-export const verifyToken =(req:Request,res:Response,next:NextFunction) =>{
-try{
-    //Authorization header nikalne
-    const authHeader=req.headers.authorization;
+type JwtPayload = {
+  userId?: string;
+  userEmail?: string;
+  role?: string;
+  id?: string;
+  email?: string;
+};
 
-    if(!authHeader){
-        return res.status(401).json({
-            success:false,
-            message:"Access denied .No Token provided",
-        });
+export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        message: "Access denied .No Token provided",
+      });
     }
 
-    //"Bearer token " abta token matra nikalne
     const token = authHeader.split(" ")[1];
-    if(!token){
-        return res.status(401).json({
-            success:false,
-            message:"Invalid token format",
-        });
-    }
-    //JWT secret check
-    if(!process.env.JWT_SECRET){
-        throw new Error("JWT_SECRET is not defined");
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token format",
+      });
     }
 
-    //token verify 
-    const decoded=jwt.verify(token,process.env.JWT_SECRET);
-    //decoded user lai request ma rakhne
-    (req as any).user=decoded;
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not defined");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
+
+    req.user = {
+      id: String(decoded.userId || decoded.id),
+      email: String(decoded.userEmail || decoded.email || ""),
+      role: decoded.role,
+    };
+
+    if (!req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token payload",
+      });
+    }
+
     next();
-}catch(error){
+  } catch (error) {
     return res.status(401).json({
-        success:false,
-        message:"Invalid or expired token.",
+      success: false,
+      message: "Invalid or expired token.",
     });
-}
-}
+  }
+};

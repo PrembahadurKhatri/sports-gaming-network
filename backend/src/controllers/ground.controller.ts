@@ -18,7 +18,7 @@ export const createGroundController = async (
   res: Response
 ) => {
   try {
-    const ownerId = (req as any).user.id;
+    const ownerId = req.user.id;
 
     const result = await createGround(
       ownerId,
@@ -57,7 +57,7 @@ export const getGroundByIdController = async (
 ) => {
   try {
     const result = await getGroundById(
-      req.params.id as string
+      req.user.id
     );
 
     return res.status(200).json(result);
@@ -74,7 +74,7 @@ export const getMyGroundsController = async (
   res: Response
 ) => {
   try {
-    const ownerId = (req as any).user.id;
+    const ownerId = req.user.id;
 
     const result = await getMyGrounds(ownerId);
 
@@ -108,7 +108,7 @@ export const updateGroundController = async (
   res: Response
 ) => {
   try {
-    const ownerId = (req as any).user.id;
+    const ownerId = req.user.id;
 
     const result = await updateGround(
       req.params.id as string,
@@ -131,7 +131,7 @@ export const deleteGroundController = async (
   res: Response
 ) => {
   try {
-    const ownerId = (req as any).user.id;
+    const ownerId = req.user.id;
 
     const result = await deleteGround(
       req.params.id as string,
@@ -152,7 +152,7 @@ export const updateGroundStatusController = async (
   res: Response
 ) => {
   try {
-    const ownerId = (req as any).user.id;
+    const ownerId = req.user.id;
 
     const { status } = req.body;
 

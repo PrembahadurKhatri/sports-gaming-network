@@ -41,22 +41,17 @@ interface JoinRequest {
   createdAt: string
 }
 
-const TEAM_STATS = [
-  { label: "Matches", value: "24", icon: Activity, color: "text-blue-500", bg: "bg-blue-500/10" },
-  { label: "Won", value: "18", icon: Trophy, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-  { label: "Lost", value: "6", icon: TrendingUp, color: "text-rose-500", bg: "bg-rose-500/10" },
-  { label: "Win Rate", value: "75%", icon: Award, color: "text-amber-500", bg: "bg-amber-500/10" },
-  { label: "Rank", value: "#1", icon: Medal, color: "text-violet-500", bg: "bg-violet-500/10" },
-  { label: "Points", value: "92", icon: Star, color: "text-cyan-500", bg: "bg-cyan-500/10" },
-]
-
-const UPCOMING_MATCHES = [
-  { id: 1, opponent: "Pokhara Strikers", date: "Aug 15", time: "7:00 AM", venue: "Dashrath Stadium", type: "League" },
-  { id: 2, opponent: "Lalitpur Legends", date: "Aug 22", time: "8:00 AM", venue: "Bhrikuti Ground", type: "League" },
+const TEAM_STATS_TEMPLATE = [
+  { label: "Matches", key: "played", icon: Activity, color: "text-blue-500", bg: "bg-blue-500/10" },
+  { label: "Won", key: "won", icon: Trophy, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+  { label: "Lost", key: "lost", icon: TrendingUp, color: "text-rose-500", bg: "bg-rose-500/10" },
+  { label: "Win Rate", key: "winRate", icon: Award, color: "text-amber-500", bg: "bg-amber-500/10" },
+  { label: "Rank", key: "rank", icon: Medal, color: "text-violet-500", bg: "bg-violet-500/10" },
+  { label: "Points", key: "rankingPoints", icon: Star, color: "text-cyan-500", bg: "bg-cyan-500/10" },
 ]
 
 export default function TeamDashboard() {
-  const { user, isAuthenticated, token } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
@@ -65,6 +60,8 @@ export default function TeamDashboard() {
   const [userTeams, setUserTeams] = useState<TeamData[]>([])
   const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([])
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [matches, setMatches] = useState<any[]>([])
+  const [teamRanking, setTeamRanking] = useState<any>(null)
 
   async function fetchTeams() {
     try {
@@ -92,7 +89,7 @@ export default function TeamDashboard() {
   async function fetchRequests(teamId: string) {
     try {
       const res = await api.get(`/teams/${teamId}/request`)
-      const requests: JoinRequest[] = res.data?.requests ?? []
+      const requests: JoinRequest[] = res.data?.Requests ?? res.data?.requests ?? []
       setJoinRequests(requests)
     } catch {
       // ignore
@@ -108,17 +105,37 @@ export default function TeamDashboard() {
     async function init() {
       setIsLoading(true)
       const teamIdFromUrl = searchParams.get("teamId")
+      let activeTeam: TeamData | null = null
 
       if (teamIdFromUrl) {
-        const t = await fetchTeamById(teamIdFromUrl)
-        if (t) fetchRequests(teamIdFromUrl)
+        activeTeam = await fetchTeamById(teamIdFromUrl)
+        if (activeTeam) fetchRequests(teamIdFromUrl)
       } else {
         const teams = await fetchTeams()
         if (teams.length > 0) {
-          const t = await fetchTeamById(teams[0]._id)
-          if (t) fetchRequests(teams[0]._id)
+          activeTeam = await fetchTeamById(teams[0]._id)
+          if (activeTeam) fetchRequests(teams[0]._id)
         }
       }
+
+      try {
+        const matchRes = await api.get("/matches")
+        setMatches(matchRes.data.matches || [])
+      } catch {
+        setMatches([])
+      }
+
+      if (activeTeam?._id && activeTeam.sport) {
+        try {
+          const rankRes = await api.get(`/team-ranking/team/${activeTeam._id}`, {
+            params: { sport: activeTeam.sport },
+          })
+          setTeamRanking(rankRes.data.ranking || rankRes.data)
+        } catch {
+          setTeamRanking(null)
+        }
+      }
+
       setIsLoading(false)
     }
     init()
@@ -261,15 +278,23 @@ export default function TeamDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-        {TEAM_STATS.map((stat) => (
-          <div key={stat.label} className="rounded-xl border bg-card p-3 text-center hover:shadow-md transition-shadow">
-            <div className={`mx-auto flex size-8 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}>
-              <stat.icon className="size-4" />
+        {TEAM_STATS_TEMPLATE.map((stat) => {
+          let value: string | number = "—"
+          if (teamRanking) {
+            if (stat.key === "winRate") value = `${teamRanking.winRate ?? 0}%`
+            else if (stat.key === "rank") value = teamRanking.rank ? `#${teamRanking.rank}` : "—"
+            else value = teamRanking[stat.key] ?? 0
+          }
+          return (
+            <div key={stat.label} className="rounded-xl border bg-card p-3 text-center hover:shadow-md transition-shadow">
+              <div className={`mx-auto flex size-8 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}>
+                <stat.icon className="size-4" />
+              </div>
+              <p className="text-lg font-bold mt-1.5">{value}</p>
+              <p className="text-[10px] text-muted-foreground">{stat.label}</p>
             </div>
-            <p className="text-lg font-bold mt-1.5">{stat.value}</p>
-            <p className="text-[10px] text-muted-foreground">{stat.label}</p>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -359,6 +384,9 @@ export default function TeamDashboard() {
             </CardHeader>
             <CardContent className="space-y-2">
               <Button variant="outline" size="sm" className="w-full justify-between" asChild>
+                <Link to="/matches">Matches <ChevronRight className="size-3.5" /></Link>
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-between" asChild>
                 <Link to="/find-players">Find Players <ChevronRight className="size-3.5" /></Link>
               </Button>
               <Button variant="outline" size="sm" className="w-full justify-between" asChild>
@@ -366,9 +394,6 @@ export default function TeamDashboard() {
               </Button>
               <Button variant="outline" size="sm" className="w-full justify-between" asChild>
                 <Link to="/grounds">Book Ground <ChevronRight className="size-3.5" /></Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-between">
-                Invite Players <ChevronRight className="size-3.5" />
               </Button>
             </CardContent>
           </Card>
@@ -383,31 +408,42 @@ export default function TeamDashboard() {
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Calendar className="size-4 text-emerald-500" /> Upcoming Matches
                 </CardTitle>
-                <Badge variant="secondary" className="text-[10px]">{UPCOMING_MATCHES.length} scheduled</Badge>
+                <Badge variant="secondary" className="text-[10px]">
+                  {matches.filter((m) => ["PENDING", "ACCEPTED", "ONGOING"].includes(m.status)).length} scheduled
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {UPCOMING_MATCHES.map((match) => (
-                <div key={match.id} className="group rounded-xl border bg-card p-4 hover:shadow-md transition-all cursor-pointer">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex flex-col items-center bg-muted rounded-lg px-3 py-2">
-                        <span className="text-sm font-bold">{match.date.split(" ")[0]}</span>
-                        <span className="text-[10px] text-muted-foreground">2026</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold group-hover:text-emerald-500 transition-colors">vs {match.opponent}</p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1"><Clock className="size-3" />{match.time}</span>
-                          <span className="flex items-center gap-1"><MapPin className="size-3" />{match.venue}</span>
+              {matches.filter((m) => ["PENDING", "ACCEPTED", "ONGOING"].includes(m.status)).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No upcoming matches.</p>
+              ) : (
+                matches
+                  .filter((m) => ["PENDING", "ACCEPTED", "ONGOING"].includes(m.status))
+                  .slice(0, 5)
+                  .map((match) => {
+                    const opponent =
+                      match.teamA?._id === team?._id
+                        ? match.teamB?.teamName
+                        : match.teamA?.teamName
+                    return (
+                      <div key={match._id} className="group rounded-xl border bg-card p-4 hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold">vs {opponent || "Opponent"}</p>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1"><Clock className="size-3" />{match.startTime}</span>
+                              <span className="flex items-center gap-1"><MapPin className="size-3" />{match.venue}</span>
+                            </div>
+                          </div>
+                          <Badge variant="secondary" className="text-[10px]">{match.status}</Badge>
                         </div>
                       </div>
-                    </div>
-                    <Badge variant="secondary" className="text-[10px]">{match.type}</Badge>
-                  </div>
-                </div>
-              ))}
-              <Button variant="ghost" size="sm" className="w-full text-xs">View Full Schedule →</Button>
+                    )
+                  })
+              )}
+              <Button variant="ghost" size="sm" className="w-full text-xs" asChild>
+                <Link to="/matches">View Full Schedule →</Link>
+              </Button>
             </CardContent>
           </Card>
 

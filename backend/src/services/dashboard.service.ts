@@ -3,6 +3,25 @@ import Team from "../models/teamregister";
 import Notification from "../models/notification";
 import joinrequest from "../models/joinrequest";
 import User from "../models/register";
+import Ground from "../models/ground";
+import Tournament from "../models/tournament";
+
+export const getHomeStats = async () => {
+  const [userCount, groundCount, tournamentCount] = await Promise.all([
+    User.countDocuments(),
+    Ground.countDocuments(),
+    Tournament.countDocuments(),
+  ]);
+
+  return {
+    success: true,
+    stats: {
+      userCount,
+      groundCount,
+      tournamentCount,
+    },
+  };
+};
 
 export const getPlayerDashboard = async (playerId:string) => {
 

@@ -2,41 +2,22 @@ import { useState, useRef, useEffect } from "react"
 import { MessageCircle, X, Send, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { cn } from "@/lib/utils"
+import api from "@/api/axios"
+import { useAuth } from "@/context/AuthContext"
 
 interface Message {
   role: "user" | "bot"
   text: string
 }
 
-const BOT_REPLIES: Record<string, string> = {
-  hello: "Hello! Welcome to PlayOnP. How can I help you today?",
-  hi: "Hi there! Need help finding a team, tournament, or ground?",
-  "find team": "You can find teams on our 'Find Teams' page. Browse by sport, location, or skill level!",
-  tournament: "Check out our Tournaments page! You need a minimum of 5 teams to create one. Participation fee applies.",
-  ground: "Visit our Grounds page to book courts and fields near you. Booking charges apply.",
-  register: "Registration is free! Sign up to create your player profile with photo and skills.",
-  pricing: "Registration, finding teams, and registering teams are free. Tournament participation, ground booking, and tournament creation are paid services.",
-  sport: "We support Cricket, Football, Volleyball, Handball, Basketball, Hockey, and many more offline sports!",
-  stats: "Game records are maintained after every match. Check Rankings page for team and player stats.",
-  contact: "You can reach us through the Contact section in the footer, or email us at support@playonp.com",
-  faq: "Check our FAQ section in the footer for common questions and answers.",
-  default: "I'm still learning! Please contact support@sportsgamingnetwork.com for detailed assistance or check our FAQ page.",
-}
-
-function getBotReply(input: string): string {
-  const lower = input.toLowerCase()
-  for (const [key, reply] of Object.entries(BOT_REPLIES)) {
-    if (lower.includes(key)) return reply
-  }
-  return BOT_REPLIES.default
-}
-
 export default function Chatbot() {
+  const { isAuthenticated } = useAuth()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     { role: "bot", text: "Hey there! I'm PlayBot. Ask me about teams, tournaments, grounds, registration, or anything else!" },
   ])
   const [input, setInput] = useState("")
+  const [sending, setSending] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -48,14 +29,33 @@ export default function Chatbot() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  function handleSend() {
+  async function handleSend() {
     const text = input.trim()
-    if (!text) return
+    if (!text || sending) return
     setMessages((prev) => [...prev, { role: "user", text }])
     setInput("")
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: "bot", text: getBotReply(text) }])
-    }, 500)
+    setSending(true)
+
+    if (!isAuthenticated) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: "Please login to chat with PlayBot powered by AI." },
+      ])
+      setSending(false)
+      return
+    }
+
+    try {
+      const { data } = await api.post("/chat", { message: text })
+      setMessages((prev) => [...prev, { role: "bot", text: data.reply || data.message || "No response." }])
+    } catch (err: any) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: err?.response?.data?.message || "Sorry, I couldn't reply right now." },
+      ])
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -82,9 +82,7 @@ export default function Chatbot() {
                 <div
                   className={cn(
                     "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
-                    msg.role === "user"
-                      ? "bg-violet-600 text-white"
-                      : "bg-muted text-foreground"
+                    msg.role === "user" ? "bg-violet-600 text-white" : "bg-muted text-foreground"
                   )}
                 >
                   {msg.text}
@@ -108,7 +106,7 @@ export default function Chatbot() {
                 placeholder="Ask me anything..."
                 className="flex-1 rounded-xl border bg-muted/50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-violet-500 dark:border-white/10"
               />
-              <Button size="icon" className="shrink-0 rounded-xl" onClick={handleSend}>
+              <Button size="icon" className="shrink-0 rounded-xl" onClick={handleSend} disabled={sending}>
                 <Send className="size-4" />
               </Button>
             </div>

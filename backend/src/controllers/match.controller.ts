@@ -8,7 +8,7 @@ import {
   startMatch as startMatchService,
   finishMatch as finishMatchService,
   cancelMatch as cancelMatchService,
-} from "../services/match.service";
+} from "../services/match.service"
 
 
 export const createMatch = async (
@@ -16,7 +16,7 @@ export const createMatch = async (
   res: Response
 ) => {
   try {
-    const ownerId = req.user.id;
+    const ownerId = req.user.id ;
 
     const result = await createMatchService(ownerId, req.body);
 
@@ -56,7 +56,7 @@ export const getMatchById = async (
   try {
     const { id } = req.params;
 
-    const result = await getMatchByIdService(id);
+    const result = await getMatchByIdService(id as string);
 
     res.status(200).json(result);
   } catch (error) {
@@ -76,7 +76,7 @@ export const acceptMatch = async (
     const ownerId = req.user.id;
     const { id } = req.params;
 
-    const result = await acceptMatchService(id, ownerId);
+    const result = await acceptMatchService(id as string, ownerId);
 
     res.status(200).json(result);
   } catch (error) {
@@ -93,10 +93,10 @@ export const rejectMatch = async (
   res: Response
 ) => {
   try {
-    const ownerId = req.user.id;
+    const ownerId = req.user.id ;
     const { id } = req.params;
 
-    const result = await rejectMatchService(id, ownerId);
+    const result = await rejectMatchService(id as string, ownerId);
 
     res.status(200).json(result);
   } catch (error) {
@@ -116,7 +116,7 @@ export const startMatch = async (
     const ownerId = req.user.id;
     const { id } = req.params;
 
-    const result = await startMatchService(id, ownerId);
+    const result = await startMatchService(id as string, ownerId);
 
     res.status(200).json(result);
   } catch (error) {
@@ -148,7 +148,7 @@ export const finishMatch = async (
     }
 
     const result = await finishMatchService(
-      id,
+      id as string,
       ownerId,
       teamAScore,
       teamBScore
@@ -172,7 +172,7 @@ export const cancelMatch = async (
     const ownerId = req.user.id;
     const { id } = req.params;
 
-    const result = await cancelMatchService(id, ownerId);
+    const result = await cancelMatchService(id as string, ownerId);
 
     res.status(200).json(result);
   } catch (error) {

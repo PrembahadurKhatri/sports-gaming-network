@@ -31,13 +31,29 @@ export const createTournament = async (
     throw new Error("End date must be after the start date.");
   }
 
+  let bannerUrl = "";
+  if (file) {
+    const uploadResult = await cloudinaryUpload(file.buffer);
+    bannerUrl = uploadResult.secure_url;
+  }
+
+  // location may arrive as JSON string from multipart forms
+  let parsedLocation = location;
+  if (typeof location === "string") {
+    try {
+      parsedLocation = JSON.parse(location);
+    } catch {
+      parsedLocation = location;
+    }
+  }
+
   const tournament = await Tournament.create({
     organizer: organizerId,
     tournamentName,
     description,
     sport,
-    location,
-    banner: file ? file.path : "",
+    location: parsedLocation,
+    banner: bannerUrl,
     rules,
     registrationDeadline,
     startDate,

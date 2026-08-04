@@ -8,10 +8,9 @@ import { Separator } from "@/components/ui/Separator"
 import { CameraIcon } from "lucide-react"
 import Card3D from "@/components/Card3D"
 import { useAuth } from "@/context/AuthContext"
-import axios from "axios";
+import api from "@/api/axios"
 const SPORTS = ["Cricket", "Football", "Volleyball", "Handball", "Basketball", "Hockey", "Tennis", "Badminton", "Futsal", "Kabaddi"]
 const SKILL_LEVELS = ["Beginner", "Intermediate", "Advanced", "Professional"]
-const API_URL = import.meta.env.VITE_API_URL;
 
 
 const POSITIONS: Record<string, string[]> = {
@@ -138,13 +137,12 @@ export default function PlayerRegistration() {
       form.append("position", selectedPositions[0]);
       form.append("profilePhoto", profilePhoto);//append the profile photo to the form data
 
-      await axios.post( //send the form data to the backend
-        `${API_URL}/api/auth/register`,//backend endpoint 
-        form //form data to be sent
-      );
+      await api.post("/auth/register", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       // Registration does not issue a token, so sign in once automatically.
-      const loginResponse = await axios.post(`${API_URL}/api/auth/login`, {
+      const loginResponse = await api.post("/auth/login", {
         email: formData.email,
         password: formData.password,
       });
@@ -156,17 +154,11 @@ export default function PlayerRegistration() {
 
       login(user, token);
       navigate(user.role === "admin" ? "/team-dashboard" : "/user-dashboard");
-    } catch (error) {
-      if (axios.isAxiosError(error)) {//check if the error is an axios error
-        console.log(error.response?.data);//log the error response data if it exists
-        setPhotoError(
-          error.response?.data?.message || "Registration failed"
-          //set the photo error message to the error response data message or a default message 
-        );
-      } else {
-        console.log(error);
-        setPhotoError("Something went wrong");
-      }
+    } catch (error: any) {
+      console.log(error.response?.data || error);
+      setPhotoError(
+        error.response?.data?.message || "Registration failed"
+      );
     } finally { //finally always runs after try and catch block whether the try block is sucessful or not.
       setLoading(false);
     }
@@ -245,20 +237,52 @@ export default function PlayerRegistration() {
 
   return (
     <div className="flex flex-col">
-      <section className="bg-gradient-to-br from-violet-500 via-indigo-500 to-purple-500 px-4 py-12 md:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col items-center text-center">
-            <Badge variant="secondary" className="mb-3">Free Registration</Badge>
-            <h1 className="text-3xl font-bold tracking-tight md:text-5xl text-white">
-              Register as a{" "}
-              <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Player</span>
-            </h1>
-            <p className="mt-3 max-w-xl text-muted-foreground " style={{ color: "white" }}>
-              Create your player profile. Add your photo, skills, and start finding teams or tournaments.
-            </p>
-          </div>
-        </div>
-      </section>
+  <section className="relative overflow-hidden py-16 md:py-24">
+
+  {/* Background Image */}
+  <img
+    src="/rega.avif" // Change to your image name
+    alt="Player Registration"
+    className="absolute inset-0 h-full w-full object-cover"
+  />
+
+  {/* Dark Overlay */}
+  <div className="absolute inset-0 bg-black/60" />
+
+  {/* Glow Effect */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.15)_0%,transparent_60%)]" />
+
+  {/* Content */}
+  <div className="relative z-10 mx-auto max-w-6xl px-4">
+
+    <div className="flex flex-col items-center text-center">
+
+      <Badge
+        variant="secondary"
+        className="mb-3 border border-white/20 bg-white/10 text-white backdrop-blur-md"
+      >
+        Free Registration
+      </Badge>
+
+      <h1 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+        Register as a{" "}
+        <span className="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+          Player
+        </span>
+      </h1>
+
+      <p className="mt-3 max-w-xl text-white/80">
+      <span className="text-white">
+        Create your player profile. Add your photo, skills, and start finding
+        teams or tournaments.
+        </span>
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
 
       <section className="px-4 py-8">
         <div className="mx-auto max-w-3xl">
